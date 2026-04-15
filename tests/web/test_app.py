@@ -39,6 +39,9 @@ def test_analyze_task_pipeline() -> None:
 
     updated = analyze_task(task["task_id"], fields, rules)
     assert updated["status"] == "completed"
+    assert updated["result"]["schema_version"] == "s1.v1"
+    assert updated["result"]["rulebook_version"] == "custom"
+    assert updated["result"]["trace_id"].startswith("trace-")
     assert updated["result"]["summary"]["PASS"] == 1
     assert updated["result"]["summary"]["FAIL"] == 1
 
@@ -53,6 +56,9 @@ def test_analyze_task_uses_s1_baseline_when_rules_empty() -> None:
 
     updated = analyze_task(task["task_id"], fields, [])
     assert updated["status"] == "completed"
+    assert updated["result"]["schema_version"] == "s1.v1"
+    assert updated["result"]["rulebook_version"] == "S1-RULEBOOK-v0.1"
+    assert updated["result"]["trace_id"].startswith("trace-")
     summary = updated["result"]["summary"]
     assert summary["PASS"] == 0
     assert summary["FAIL"] == 0

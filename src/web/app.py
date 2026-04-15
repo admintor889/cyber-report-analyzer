@@ -1,8 +1,11 @@
+from datetime import datetime, timezone
 from typing import Any, Dict, List
+from uuid import uuid4
 
 from src.model_review.reviewer import semantic_review
 from src.reporting.report_exporter import export_summary
 from src.rules_engine.rule_engine import evaluate_rules, evaluate_s1_baseline
+from src.rules_engine.s1_rulebook import get_s1_rulebook
 
 
 _TASKS: Dict[str, Dict[str, Any]] = {}
@@ -54,9 +57,11 @@ def analyze_task(task_id: str, fields: Dict[str, str], rules: List[Dict[str, str
     if not isinstance(rules, list):
         raise TypeError("rules must be a list")
 
+    rulebook_version = "custom"
     if rules:
         rule_results = evaluate_rules(fields, rules)
     else:
+        rulebook_version = str(get_s1_rulebook()["rulebook_version"])
         rule_results = evaluate_s1_baseline(fields)
     review_details: List[Dict[str, str]] = []
 
@@ -71,6 +76,10 @@ def analyze_task(task_id: str, fields: Dict[str, str], rules: List[Dict[str, str
 
     summary = export_summary(rule_results)
     payload: Dict[str, Any] = {
+        "schema_version": "s1.v1",
+        "trace_id": f"trace-{uuid4().hex[:12]}",
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "rulebook_version": rulebook_version,
         "task_id": task_id,
         "fields": fields,
         "rule_results": rule_results,
