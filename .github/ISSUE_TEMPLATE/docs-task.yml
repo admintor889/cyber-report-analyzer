@@ -1,0 +1,50 @@
+name: Docs Task
+description: 文档与交付材料任务
+title: "[Docs][Sx] 简要标题"
+labels:
+  - type:docs
+body:
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 所属阶段
+      options:
+        - S1
+        - S2
+        - S3
+        - S4
+        - S5
+    validations:
+      required: true
+
+  - type: textarea
+    id: output
+    attributes:
+      label: 交付物
+      description: 指明要产出的文档或材料
+      placeholder: 例如 用户手册 测试报告 部署说明
+    validations:
+      required: true
+
+  - type: textarea
+    id: outline
+    attributes:
+      label: 内容大纲
+      placeholder: 章节列表
+    validations:
+      required: true
+
+  - type: input
+    id: owner
+    attributes:
+      label: 负责人
+    validations:
+      required: true
+
+  - type: input
+    id: due
+    attributes:
+      label: 截止日期
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true

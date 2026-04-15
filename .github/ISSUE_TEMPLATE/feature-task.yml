@@ -1,0 +1,86 @@
+name: Feature Task
+description: 新功能或阶段性开发任务
+title: "[Feature][Sx][module] 简要标题"
+labels:
+  - type:feature
+body:
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 所属阶段
+      options:
+        - S1 需求确认与规则梳理
+        - S2 解析链路与OCR
+        - S3 规则引擎与模型复核
+        - S4 系统集成与测试优化
+        - S5 结题交付
+    validations:
+      required: true
+
+  - type: dropdown
+    id: module
+    attributes:
+      label: 所属模块
+      options:
+        - parser
+        - ocr
+        - rules
+        - model
+        - web
+        - evidence
+        - deploy
+        - docs
+        - test
+    validations:
+      required: true
+
+  - type: textarea
+    id: background
+    attributes:
+      label: 背景与目标
+      description: 描述该任务为什么要做，完成后带来什么价值
+      placeholder: 背景与目标
+    validations:
+      required: true
+
+  - type: textarea
+    id: io
+    attributes:
+      label: 输入输出定义
+      description: 说明输入是什么，输出是什么
+      placeholder: 输入 输出
+    validations:
+      required: true
+
+  - type: textarea
+    id: dod
+    attributes:
+      label: 完成标准 DoD
+      description: 用可验收标准描述完成条件
+      placeholder: 列出可验证完成标准
+    validations:
+      required: true
+
+  - type: input
+    id: owner
+    attributes:
+      label: 负责人
+      placeholder: 例如 徐志翔
+    validations:
+      required: true
+
+  - type: input
+    id: reviewer
+    attributes:
+      label: 评审人
+      placeholder: 例如 吴世豪
+    validations:
+      required: true
+
+  - type: input
+    id: due
+    attributes:
+      label: 截止日期
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
