@@ -1,5 +1,12 @@
 # S1阶段 Issue 清单（2026-03-31 至 2026-04-20）
 
+配套执行文档：docs/github/S1-协同开发执行手册.md
+
+使用建议：
+- 先阅读执行手册，再按本清单创建Issue
+- 创建Issue时必须打全标签（type、stage、module、priority）
+- 每日更新Issue状态，周日统一汇总到develop
+
 说明：以下为首批可直接在GitHub创建的任务，已按成员职责和里程碑M1拆解。
 
 ## A. 项目负责人 徐志翔
