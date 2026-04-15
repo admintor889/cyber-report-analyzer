@@ -1,4 +1,8 @@
-from typing import Any, Dict
+from typing import Any, Dict, List
+
+from src.model_review.reviewer import semantic_review
+from src.reporting.report_exporter import export_summary
+from src.rules_engine.rule_engine import evaluate_rules
 
 
 _TASKS: Dict[str, Dict[str, Any]] = {}
@@ -37,4 +41,38 @@ def set_task_result(task_id: str, result: Dict[str, Any]) -> Dict[str, Any]:
     task = get_task(task_id)
     task["result"] = result
     task["status"] = "completed"
+    return task
+
+
+def analyze_task(task_id: str, fields: Dict[str, str], rules: List[Dict[str, str]]) -> Dict[str, Any]:
+    """Execute minimal analysis pipeline and store final result on task.
+
+    This function is the backend orchestration entry for S1/S2 integration.
+    """
+    if not isinstance(fields, dict):
+        raise TypeError("fields must be a dict")
+    if not isinstance(rules, list):
+        raise TypeError("rules must be a list")
+
+    rule_results = evaluate_rules(fields, rules)
+    review_details: List[Dict[str, str]] = []
+
+    for item in rule_results:
+        if item.get("verdict") == "REVIEW":
+            review_details.append(
+                {
+                    "rule_id": item.get("rule_id", ""),
+                    **semantic_review({"value": item.get("value", "")}),
+                }
+            )
+
+    summary = export_summary(rule_results)
+    payload: Dict[str, Any] = {
+        "task_id": task_id,
+        "fields": fields,
+        "rule_results": rule_results,
+        "review_details": review_details,
+        "summary": summary,
+    }
+    task = set_task_result(task_id, payload)
     return task

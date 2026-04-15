@@ -1,4 +1,4 @@
-from src.web.app import get_task, health, set_task_result, submit_report
+from src.web.app import analyze_task, get_task, health, set_task_result, submit_report
 
 
 def test_health_endpoint() -> None:
@@ -17,3 +17,27 @@ def test_set_task_result_marks_completed() -> None:
     updated = set_task_result(task["task_id"], {"summary": "ok"})
     assert updated["status"] == "completed"
     assert updated["result"] == {"summary": "ok"}
+
+
+def test_analyze_task_pipeline() -> None:
+    task = submit_report("report-3.pdf")
+    fields = {"crypto.rsa.key_length": "2048", "crypto.tls.version": "1.2"}
+    rules = [
+        {
+            "rule_id": "R-RSA-001",
+            "field": "crypto.rsa.key_length",
+            "operator": ">=",
+            "value": "3072",
+        },
+        {
+            "rule_id": "R-TLS-001",
+            "field": "crypto.tls.version",
+            "operator": "==",
+            "value": "1.2",
+        },
+    ]
+
+    updated = analyze_task(task["task_id"], fields, rules)
+    assert updated["status"] == "completed"
+    assert updated["result"]["summary"]["PASS"] == 1
+    assert updated["result"]["summary"]["FAIL"] == 1
