@@ -49,6 +49,7 @@ function Get-VenvPython {
 $repoRoot = Get-RepoRoot
 $systemPython = Resolve-Python
 $venv = Get-VenvPython -RepoRoot $repoRoot -RawVenvPath $VenvPath
+$requirementsPath = Join-Path $repoRoot "requirements.txt"
 
 Write-Step "Using system Python: $systemPython"
 
@@ -67,16 +68,20 @@ if (-not (Test-Path -LiteralPath $venv.Python)) {
     throw "The virtual environment python executable was not found: $($venv.Python)"
 }
 
+if (-not (Test-Path -LiteralPath $requirementsPath)) {
+    throw "requirements.txt was not found: $requirementsPath"
+}
+
 Write-Step "Upgrading pip"
 & $venv.Python -m pip install --upgrade pip
 if ($LASTEXITCODE -ne 0) {
     throw "Failed to upgrade pip."
 }
 
-Write-Step "Installing minimal development dependency: pytest"
-& $venv.Python -m pip install pytest
+Write-Step "Installing dependencies from requirements.txt"
+& $venv.Python -m pip install -r $requirementsPath
 if ($LASTEXITCODE -ne 0) {
-    throw "Failed to install pytest."
+    throw "Failed to install dependencies from requirements.txt."
 }
 
 if ($RunChecks) {
