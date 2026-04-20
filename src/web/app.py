@@ -114,6 +114,14 @@ def _load_fields(path: Path) -> Dict[str, str]:
     return load_string_map(path)
 
 
+def _resolve_file_name(file_name: str | None, pdf_path: Path | None, fields_file: Path) -> str:
+    if file_name:
+        return file_name
+    if pdf_path:
+        return pdf_path.name
+    return f"{fields_file.stem}.pdf"
+
+
 def _main() -> None:
     parser = argparse.ArgumentParser(description="Run the S1 backend task loop.")
     parser.add_argument("--file-name", help="Original report file name.")
@@ -122,7 +130,7 @@ def _main() -> None:
     parser.add_argument("--output", type=Path, help="Optional JSON output path.")
     args = parser.parse_args()
 
-    file_name = args.file_name or (args.pdf_path.name if args.pdf_path else "")
+    file_name = _resolve_file_name(args.file_name, args.pdf_path, args.fields_file)
     task = submit_report(file_name)
     completed = analyze_task(task["task_id"], _load_fields(args.fields_file), [])
     compact = {

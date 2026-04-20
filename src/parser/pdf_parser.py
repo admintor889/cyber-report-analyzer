@@ -18,7 +18,7 @@ TEXT_SECTION_RE = re.compile(rb"BT(.*?)ET", re.DOTALL)
 def extract_text_and_images(pdf_path: Path) -> Dict[str, List[str]]:
     """Extract text blocks and image files from one PDF.
 
-    S1 目标不是完整 PDF 引擎，而是实现“单个原生 PDF 的最小可运行链路”：
+    S1 目标不是完整文件引擎，而是实现“单个原生报告文件的最小可运行链路”：
     - 提取可直接读取的文本流
     - 提取图片对象并写成独立文件，供后续 OCR 使用
     """
@@ -30,12 +30,13 @@ def extract_text_and_images(pdf_path: Path) -> Dict[str, List[str]]:
         raise ValueError(f"pdf_path must be a file: {pdf_path}")
 
     pdf_bytes = pdf_path.read_bytes()
-    text_blocks = _extract_text_blocks(pdf_bytes)
-    image_paths = _extract_images(pdf_bytes, pdf_path)
+    text_blocks = _extract_pdf_text_blocks(pdf_bytes)
+    image_paths = _extract_pdf_images(pdf_bytes, pdf_path)
+
     return {"text_blocks": text_blocks, "image_paths": image_paths}
 
 
-def _extract_text_blocks(pdf_bytes: bytes) -> List[str]:
+def _extract_pdf_text_blocks(pdf_bytes: bytes) -> List[str]:
     text_blocks: List[str] = []
 
     for stream in _iter_stream_objects(pdf_bytes):
@@ -55,7 +56,7 @@ def _extract_text_blocks(pdf_bytes: bytes) -> List[str]:
     return text_blocks
 
 
-def _extract_images(pdf_bytes: bytes, pdf_path: Path) -> List[str]:
+def _extract_pdf_images(pdf_bytes: bytes, pdf_path: Path) -> List[str]:
     image_paths: List[str] = []
     output_dir: Path | None = None
 
