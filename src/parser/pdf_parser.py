@@ -86,12 +86,6 @@ def _resolve_pdf_reader():
         return None
 
 
-def _normalize_text_block(text: str) -> str:
-    cleaned = text.replace("\x00", "").replace("\r\n", "\n").replace("\r", "\n")
-    lines = [re.sub(r"\s+", " ", line).strip() for line in cleaned.split("\n")]
-    return "\n".join(line for line in lines if line)
-
-
 def _normalize_text_lines(text: str) -> List[str]:
     cleaned = text.replace("\x00", "").replace("\r\n", "\n").replace("\r", "\n")
     return [line for line in (re.sub(r"\s+", " ", s).strip() for s in cleaned.split("\n")) if line]

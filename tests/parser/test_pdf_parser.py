@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import base64
-import re
 import zlib
 from pathlib import Path
 
@@ -60,18 +59,32 @@ def test_extract_text_and_images_exports_embedded_jpeg(tmp_path: Path) -> None:
     assert exported_image.read_bytes() == jpeg_bytes
 
 
-def test_extract_text_and_images_real_pdf_has_chinese_text() -> None:
-    real_pdf = (
-        Path(__file__).resolve().parents[2]
-        / "tests"
-        / "网络空间安全基地+南昌大学学工一体化平台垂直越权+攻击报告.pdf"
-    )
-    if not real_pdf.exists():
-        pytest.skip("real PDF fixture not found")
+def test_extract_text_and_images_reader_path_extracts_chinese_lines(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    pdf_path = tmp_path / "reader.pdf"
+    pdf_path.write_bytes(b"%PDF-1.4\n%%EOF\n")
 
-    result = extract_text_and_images(real_pdf)
-    joined_text = "\n".join(result["text_blocks"])
-    assert re.search(r"[\u4e00-\u9fff]", joined_text)
+    class _FakePage:
+        def __init__(self, text: str) -> None:
+            self._text = text
+
+        def extract_text(self) -> str:
+            return self._text
+
+    class _FakeReader:
+        def __init__(self, _path: str) -> None:
+            self.pages = [_FakePage("第一行中文\n第二行中文"), _FakePage("  第三行中文  ")]
+
+    def _fallback_should_not_run(_pdf_bytes: bytes) -> list[str]:
+        raise AssertionError("Fallback parser should not run when reader extraction succeeds")
+
+    monkeypatch.setattr("src.parser.pdf_parser._resolve_pdf_reader", lambda: _FakeReader)
+    monkeypatch.setattr("src.parser.pdf_parser._extract_pdf_text_blocks", _fallback_should_not_run)
+
+    result = extract_text_and_images(pdf_path)
+
+    assert result["text_blocks"] == ["第一行中文", "第二行中文", "第三行中文"]
 
 
 def _build_pdf_with_text_stream(stream_bytes: bytes, *, flate: bool) -> bytes:
